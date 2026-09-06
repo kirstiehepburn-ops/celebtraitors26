@@ -953,7 +953,23 @@ contestants.forEach(c => {
 // 3. Project settings (gear icon) → General → "Your apps" → Add app → Web (</>) 
 // 4. Copy the firebaseConfig object it gives you and paste it in place of the one below
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY_HERE",
+  apiKey: "// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBbf2JaKEsrJkZ5169goDsCXmsrPoAVtT0",
+  authDomain: "celebtraitors26.firebaseapp.com",
+  projectId: "celebtraitors26",
+  storageBucket: "celebtraitors26.firebasestorage.app",
+  messagingSenderId: "841202331590",
+  appId: "1:841202331590:web:1bfc19cf06d3714ffeccc7"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);",
   authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
   projectId: "PASTE_YOUR_PROJECT_ID",
   storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
