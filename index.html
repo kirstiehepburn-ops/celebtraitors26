@@ -595,6 +595,11 @@ table.game-table {
   color: var(--mid, #6b6b6b);
   margin-bottom: 0.75rem;
 }
+.game-btn-secondary {
+  background: transparent;
+  color: var(--ink, #2c2620);
+  border: 1px solid var(--ink, #2c2620);
+}
 .deadline-cell {
   font-size: 0.78rem;
   color: var(--mid, #6b6b6b);
@@ -1077,10 +1082,14 @@ try {
     </div>
 
     <div class="game-tab-panel" id="tabPicks">
+      <div class="game-intro" style="padding:0 0 0.8rem;">
+        Already submitted? Type your name <strong>exactly as before</strong> and click <strong>Edit My Selection</strong> to load and update your picks — typing it slightly differently (e.g. a nickname or different capitalisation) will create a second, separate entry instead of updating yours.
+      </div>
       <div class="game-name-row">
         <label for="playerName">Your name</label>
         <input type="text" id="playerName" placeholder="e.g. Sam" maxlength="30">
         <button class="game-btn" id="submitPicksBtn">Submit My Picks</button>
+        <button class="game-btn game-btn-secondary" id="loadPicksBtn">Edit My Selection</button>
         <span class="game-submit-status" id="submitStatus"></span>
       </div>
       <div class="points-key">Starting role correct: <strong>3pts</strong> · Next to Leave correct (each episode): <strong>4pts</strong> · Correctly called the Winner: <strong>+10pts bonus</strong></div>
@@ -1212,6 +1221,10 @@ try {
   });
 
   // ---------- Submit picks ----------
+  function docIdFromName(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
   document.getElementById('submitPicksBtn').addEventListener('click', async () => {
     const nameInput = document.getElementById('playerName');
     const name = nameInput.value.trim();
@@ -1233,7 +1246,7 @@ try {
 
     const winnerPick = document.getElementById('winnerPick').value || null;
 
-    const docId = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'player' + Date.now();
+    const docId = docIdFromName(name) || 'player' + Date.now();
     status.textContent = 'Saving…';
     try {
       await db.collection('predictions').doc(docId).set({
@@ -1247,6 +1260,49 @@ try {
     } catch (e) {
       console.error(e);
       status.textContent = 'Could not save — check your Firebase setup.';
+    }
+  });
+
+  document.getElementById('loadPicksBtn').addEventListener('click', async () => {
+    const nameInput = document.getElementById('playerName');
+    const name = nameInput.value.trim();
+    const status = document.getElementById('submitStatus');
+    if (!name) { status.textContent = 'Enter your name first.'; return; }
+
+    const docId = docIdFromName(name);
+    if (!docId) { status.textContent = 'Enter a valid name first.'; return; }
+
+    status.textContent = 'Loading your picks…';
+    try {
+      const doc = await db.collection('predictions').doc(docId).get();
+      if (!doc.exists) {
+        status.textContent = "No saved picks found under that exact name — check the spelling, or just fill in your picks and submit fresh.";
+        return;
+      }
+      const data = doc.data();
+
+      // Restore starting role picks (skip any row already locked/disabled)
+      document.querySelectorAll('#gameBody .game-row').forEach(row => {
+        const sel = row.querySelector('.predict-role');
+        const saved = data.picks && data.picks[row.dataset.name];
+        if (saved && saved.role && !sel.disabled) sel.value = saved.role;
+      });
+
+      // Restore Next to Leave picks (skip locked rounds)
+      document.querySelectorAll('#nextToLeaveBody .game-row').forEach(row => {
+        const sel = row.querySelector('.predict-next-to-leave');
+        const saved = data.nextToLeave && data.nextToLeave[row.dataset.ep];
+        if (saved && sel && !sel.disabled) sel.value = saved;
+      });
+
+      // Restore winner pick (skip if locked)
+      const winnerSel = document.getElementById('winnerPick');
+      if (data.winnerPick && !winnerSel.disabled) winnerSel.value = data.winnerPick;
+
+      status.textContent = "✓ Loaded your picks from \"" + data.name + "\" — make any changes, then hit Submit to update.";
+    } catch (e) {
+      console.error(e);
+      status.textContent = 'Could not load — check your Firebase setup.';
     }
   });
 
