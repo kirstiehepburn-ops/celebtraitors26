@@ -595,6 +595,28 @@ table.game-table {
   color: var(--mid, #6b6b6b);
   margin-bottom: 0.75rem;
 }
+.deadline-cell {
+  font-size: 0.78rem;
+  color: var(--mid, #6b6b6b);
+  white-space: nowrap;
+}
+.locked-badge {
+  display: inline-block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: #8b1a1a;
+  padding: 0.12rem 0.45rem;
+  border-radius: 3px;
+}
+.winner-row select:disabled,
+.predict-next-to-leave:disabled {
+  background: #eee;
+  color: #999;
+  cursor: not-allowed;
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -979,6 +1001,36 @@ try {
   const panel = document.getElementById('gamePanel');
   const episodeNumbers = ['1','2','3','4','5','6','7','8','9','10'];
 
+  // Deadlines: winner pick locks before launch; each episode locks before it airs
+  // (Thursdays and Fridays, starting 1 Oct 2026, 20:30 local time)
+  const winnerDeadline = new Date('2026-10-01T20:30:00');
+  const episodeDeadlines = {
+    '1':  new Date('2026-10-01T20:30:00'),
+    '2':  new Date('2026-10-02T20:30:00'),
+    '3':  new Date('2026-10-08T20:30:00'),
+    '4':  new Date('2026-10-09T20:30:00'),
+    '5':  new Date('2026-10-15T20:30:00'),
+    '6':  new Date('2026-10-16T20:30:00'),
+    '7':  new Date('2026-10-22T20:30:00'),
+    '8':  new Date('2026-10-23T20:30:00'),
+    '9':  new Date('2026-10-29T20:30:00'),
+    '10': new Date('2026-10-30T20:30:00')
+  };
+
+  function formatDeadline(d) {
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let h = d.getHours();
+    const ampm = h >= 12 ? 'pm' : 'am';
+    h = h % 12 || 12;
+    const mins = d.getMinutes().toString().padStart(2, '0');
+    return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}, ${h}:${mins}${ampm}`;
+  }
+
+  function isLocked(deadline) {
+    return Date.now() > deadline.getTime();
+  }
+
   function contestantSelectOptions() {
     return ['<option value="">—</option>']
       .concat(contestants.map(c => `<option value="${c.name}">${c.name}</option>`))
@@ -1008,10 +1060,13 @@ try {
 
   let nextToLeaveRowsHTML = '';
   episodeNumbers.forEach(ep => {
+    const deadline = episodeDeadlines[ep];
+    const locked = isLocked(deadline);
     nextToLeaveRowsHTML += `
       <tr class="game-row" data-ep="${ep}">
         <td class="name-cell">Episode ${ep}</td>
-        <td><select class="predict-next-to-leave">${contestantSelectOptions()}</select></td>
+        <td><select class="predict-next-to-leave" ${locked ? 'disabled' : ''}>${contestantSelectOptions()}</select></td>
+        <td class="deadline-cell">${locked ? '<span class="locked-badge">LOCKED</span>' : formatDeadline(deadline)}</td>
       </tr>`;
   });
 
@@ -1029,7 +1084,14 @@ try {
         <span class="game-submit-status" id="submitStatus"></span>
       </div>
       <div class="points-key">Starting role correct: <strong>3pts</strong> · Next to Leave correct (each episode): <strong>4pts</strong> · Correctly called the Winner: <strong>+10pts bonus</strong></div>
-      <div class="game-table-wrap">
+
+      <div class="game-name-row winner-row" style="margin-top:0.5rem;">
+        <label for="winnerPick">Who wins it all?</label>
+        <select id="winnerPick" style="min-width:180px;" ${isLocked(winnerDeadline) ? 'disabled' : ''}>${contestantSelectOptions()}</select>
+        <span class="deadline-cell">${isLocked(winnerDeadline) ? '<span class="locked-badge">LOCKED</span>' : 'Locks ' + formatDeadline(winnerDeadline)}</span>
+      </div>
+
+      <div class="game-table-wrap" style="margin-top:1.2rem;">
         <table class="game-table">
           <thead>
             <tr>
@@ -1042,20 +1104,15 @@ try {
       </div>
 
       <div class="game-intro" style="padding:1.5rem 0 0.5rem;">
-        Pick who you think is <strong>Next to Leave</strong> each episode — fill each one in before that episode airs. You can come back and update later rounds any time before they air; earlier rounds lock once you've submitted.
+        Pick who you think is <strong>Next to Leave</strong> each episode — fill each one in before that episode airs. Each round locks automatically once its deadline passes.
       </div>
       <div class="game-table-wrap">
         <table class="game-table">
           <thead>
-            <tr><th>Round</th><th>Who Leaves This Episode</th></tr>
+            <tr><th>Round</th><th>Who Leaves This Episode</th><th>Deadline</th></tr>
           </thead>
           <tbody id="nextToLeaveBody">${nextToLeaveRowsHTML}</tbody>
         </table>
-      </div>
-
-      <div class="game-name-row" style="margin-top:1.5rem;">
-        <label for="winnerPick">Who wins it all?</label>
-        <select id="winnerPick" style="min-width:180px;">${contestantSelectOptions()}</select>
       </div>
     </div>
 
