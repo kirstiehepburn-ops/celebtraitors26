@@ -595,6 +595,15 @@ table.game-table {
   color: var(--mid, #6b6b6b);
   margin-bottom: 0.75rem;
 }
+.traitor-count-row {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--mid, #6b6b6b);
+  margin: 1.2rem 0 0.4rem;
+}
+.traitor-count-row.at-limit {
+  color: #8b1a1a;
+}
 .game-btn-secondary {
   background: transparent;
   color: var(--ink, #2c2620);
@@ -1100,7 +1109,8 @@ try {
         <span class="deadline-cell">${isLocked(winnerDeadline) ? '<span class="locked-badge">LOCKED</span>' : 'Locks ' + formatDeadline(winnerDeadline)}</span>
       </div>
 
-      <div class="game-table-wrap" style="margin-top:1.2rem;">
+      <div class="traitor-count-row" id="traitorCountRow">0 of 4 Traitors picked</div>
+      <div class="game-table-wrap">
         <table class="game-table">
           <thead>
             <tr>
@@ -1201,6 +1211,33 @@ try {
     adminNextToLeaveBody.appendChild(row);
   });
 
+  // ---------- Enforce max 4 Traitor picks ----------
+  const MAX_TRAITORS = 4;
+  const roleSelects = Array.from(document.querySelectorAll('#gameBody .predict-role'));
+  const traitorCountRow = document.getElementById('traitorCountRow');
+
+  function updateTraitorCount() {
+    const count = roleSelects.filter(s => s.value === 'traitor').length;
+    traitorCountRow.textContent = `${count} of ${MAX_TRAITORS} Traitors picked`;
+    traitorCountRow.classList.toggle('at-limit', count >= MAX_TRAITORS);
+  }
+
+  roleSelects.forEach(sel => {
+    sel.dataset.prevValue = '';
+    sel.addEventListener('change', () => {
+      const count = roleSelects.filter(s => s.value === 'traitor').length;
+      if (sel.value === 'traitor' && count > MAX_TRAITORS) {
+        sel.value = sel.dataset.prevValue || '';
+        traitorCountRow.textContent = `You can only pick ${MAX_TRAITORS} Traitors — change another pick first.`;
+        traitorCountRow.classList.add('at-limit');
+        return;
+      }
+      sel.dataset.prevValue = sel.value;
+      updateTraitorCount();
+    });
+  });
+  updateTraitorCount();
+
   document.getElementById('tabPicksBtn').addEventListener('click', () => {
     document.getElementById('tabPicks').style.display = 'block';
     document.getElementById('tabBoard').style.display = 'none';
@@ -1285,8 +1322,12 @@ try {
       document.querySelectorAll('#gameBody .game-row').forEach(row => {
         const sel = row.querySelector('.predict-role');
         const saved = data.picks && data.picks[row.dataset.name];
-        if (saved && saved.role && !sel.disabled) sel.value = saved.role;
+        if (saved && saved.role && !sel.disabled) {
+          sel.value = saved.role;
+          sel.dataset.prevValue = saved.role;
+        }
       });
+      if (typeof updateTraitorCount === 'function') updateTraitorCount();
 
       // Restore Next to Leave picks (skip locked rounds)
       document.querySelectorAll('#nextToLeaveBody .game-row').forEach(row => {
