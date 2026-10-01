@@ -1079,7 +1079,8 @@ try {
     nextToLeaveRowsHTML += `
       <tr class="game-row" data-ep="${ep}">
         <td class="name-cell">Episode ${ep}</td>
-        <td><select class="predict-next-to-leave" ${locked ? 'disabled' : ''}>${contestantSelectOptions()}</select></td>
+        <td><select class="predict-banished" ${locked ? 'disabled' : ''}>${contestantSelectOptions()}</select></td>
+        <td><select class="predict-murdered" ${locked ? 'disabled' : ''}>${contestantSelectOptions()}</select></td>
         <td class="deadline-cell">${locked ? '<span class="locked-badge">LOCKED</span>' : formatDeadline(deadline)}</td>
       </tr>`;
   });
@@ -1101,7 +1102,7 @@ try {
         <button class="game-btn game-btn-secondary" id="loadPicksBtn">Edit My Selection</button>
         <span class="game-submit-status" id="submitStatus"></span>
       </div>
-      <div class="points-key">Starting role correct: <strong>3pts</strong> · Next to Leave correct (each episode): <strong>4pts</strong> · Correctly called the Winner: <strong>+10pts bonus</strong></div>
+      <div class="points-key">Starting role correct: <strong>3pts</strong> · Banished or Murdered correct (each, each episode): <strong>4pts</strong> · Correctly called the Winner: <strong>+10pts bonus</strong></div>
 
       <div class="game-name-row winner-row" style="margin-top:0.5rem;">
         <label for="winnerPick">Who wins it all?</label>
@@ -1123,12 +1124,12 @@ try {
       </div>
 
       <div class="game-intro" style="padding:1.5rem 0 0.5rem;">
-        Pick who you think is <strong>Next to Leave</strong> each episode — fill each one in before that episode airs. Each round locks automatically once its deadline passes.
+        Pick who you think gets <strong>Banished</strong> (voted out) and who gets <strong>Murdered</strong> (killed by the Traitors) each episode — fill both in before that episode airs. Each round locks automatically once its deadline passes.
       </div>
       <div class="game-table-wrap">
         <table class="game-table">
           <thead>
-            <tr><th>Round</th><th>Who Leaves This Episode</th><th>Deadline</th></tr>
+            <tr><th>Round</th><th>Banished</th><th>Murdered</th><th>Deadline</th></tr>
           </thead>
           <tbody id="nextToLeaveBody">${nextToLeaveRowsHTML}</tbody>
         </table>
@@ -1171,7 +1172,7 @@ try {
       <div class="game-intro" style="padding:1.5rem 0 0.5rem;">Who actually left each episode:</div>
       <div class="game-table-wrap">
         <table class="game-table">
-          <thead><tr><th>Round</th><th>Who Actually Left</th></tr></thead>
+          <thead><tr><th>Round</th><th>Actually Banished</th><th>Actually Murdered</th></tr></thead>
           <tbody id="adminNextToLeaveBody"></tbody>
         </table>
       </div>
@@ -1207,7 +1208,8 @@ try {
     row.dataset.ep = ep;
     row.innerHTML = `
       <td class="name-cell">Episode ${ep}</td>
-      <td><select class="admin-next-to-leave">${contestantSelectOptions()}</select></td>`;
+      <td><select class="admin-banished">${contestantSelectOptions()}</select></td>
+      <td><select class="admin-murdered">${contestantSelectOptions()}</select></td>`;
     adminNextToLeaveBody.appendChild(row);
   });
 
@@ -1277,8 +1279,11 @@ try {
 
     const nextToLeave = {};
     document.querySelectorAll('#nextToLeaveBody .game-row').forEach(row => {
-      const val = row.querySelector('.predict-next-to-leave').value;
-      if (val) nextToLeave[row.dataset.ep] = val;
+      const banished = row.querySelector('.predict-banished').value;
+      const murdered = row.querySelector('.predict-murdered').value;
+      if (banished || murdered) {
+        nextToLeave[row.dataset.ep] = { banished: banished || null, murdered: murdered || null };
+      }
     });
 
     const winnerPick = document.getElementById('winnerPick').value || null;
@@ -1329,11 +1334,14 @@ try {
       });
       if (typeof updateTraitorCount === 'function') updateTraitorCount();
 
-      // Restore Next to Leave picks (skip locked rounds)
+      // Restore Banished/Murdered picks (skip locked rounds)
       document.querySelectorAll('#nextToLeaveBody .game-row').forEach(row => {
-        const sel = row.querySelector('.predict-next-to-leave');
         const saved = data.nextToLeave && data.nextToLeave[row.dataset.ep];
-        if (saved && sel && !sel.disabled) sel.value = saved;
+        if (!saved) return;
+        const banSel = row.querySelector('.predict-banished');
+        const murSel = row.querySelector('.predict-murdered');
+        if (saved.banished && banSel && !banSel.disabled) banSel.value = saved.banished;
+        if (saved.murdered && murSel && !murSel.disabled) murSel.value = saved.murdered;
       });
 
       // Restore winner pick (skip if locked)
@@ -1358,8 +1366,11 @@ try {
 
     const actualNextToLeave = {};
     document.querySelectorAll('#adminNextToLeaveBody .game-row').forEach(row => {
-      const val = row.querySelector('.admin-next-to-leave').value;
-      if (val) actualNextToLeave[row.dataset.ep] = val;
+      const banished = row.querySelector('.admin-banished').value;
+      const murdered = row.querySelector('.admin-murdered').value;
+      if (banished || murdered) {
+        actualNextToLeave[row.dataset.ep] = { banished: banished || null, murdered: murdered || null };
+      }
     });
 
     const actualWinner = document.getElementById('adminWinner').value || null;
@@ -1408,9 +1419,11 @@ try {
 
       if (latestResults && latestResults.actualNextToLeave) {
         Object.keys(data.nextToLeave || {}).forEach(ep => {
-          if (data.nextToLeave[ep] && latestResults.actualNextToLeave[ep] === data.nextToLeave[ep]) {
-            exitPts += 4;
-          }
+          const pick = data.nextToLeave[ep];
+          const actual = latestResults.actualNextToLeave[ep];
+          if (!pick || !actual) return;
+          if (pick.banished && actual.banished && pick.banished === actual.banished) exitPts += 4;
+          if (pick.murdered && actual.murdered && pick.murdered === actual.murdered) exitPts += 4;
         });
       }
 
