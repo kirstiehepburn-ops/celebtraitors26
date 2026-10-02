@@ -1016,19 +1016,19 @@ try {
   const episodeNumbers = ['1','2','3','4','5','6','7','8','9','10'];
 
   // Deadlines: winner pick locks before launch; each episode locks before it airs
-  // (Thursdays and Fridays, starting 1 Oct 2026, 20:30 local time)
-  const winnerDeadline = new Date('2026-10-01T20:30:00');
+  // (Thursdays and Fridays, starting 1 Oct 2026, 19:30 local time — 30 mins before each 20:00 episode)
+  const winnerDeadline = new Date('2026-10-01T19:30:00');
   const episodeDeadlines = {
-    '1':  new Date('2026-10-01T20:30:00'),
-    '2':  new Date('2026-10-02T20:30:00'),
-    '3':  new Date('2026-10-08T20:30:00'),
-    '4':  new Date('2026-10-09T20:30:00'),
-    '5':  new Date('2026-10-15T20:30:00'),
-    '6':  new Date('2026-10-16T20:30:00'),
-    '7':  new Date('2026-10-22T20:30:00'),
-    '8':  new Date('2026-10-23T20:30:00'),
-    '9':  new Date('2026-10-29T20:30:00'),
-    '10': new Date('2026-10-30T20:30:00')
+    '1':  new Date('2026-10-01T19:30:00'),
+    '2':  new Date('2026-10-02T19:30:00'),
+    '3':  new Date('2026-10-08T19:30:00'),
+    '4':  new Date('2026-10-09T19:30:00'),
+    '5':  new Date('2026-10-15T19:30:00'),
+    '6':  new Date('2026-10-16T19:30:00'),
+    '7':  new Date('2026-10-22T19:30:00'),
+    '8':  new Date('2026-10-23T19:30:00'),
+    '9':  new Date('2026-10-29T19:30:00'),
+    '10': new Date('2026-10-30T19:30:00')
   };
 
   function formatDeadline(d) {
