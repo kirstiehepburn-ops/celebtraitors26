@@ -724,9 +724,8 @@ table.game-table {
 </div>
 
 <div class="legend">
-  <div class="legend-item"><div class="legend-dot t"></div> Should be Traitor</div>
-  <div class="legend-item"><div class="legend-dot f"></div> Should be Faithful</div>
-  <div class="legend-item"><div class="legend-dot e"></div> Could play either</div>
+  <div class="legend-item"><div class="legend-dot t"></div> Confirmed Traitor</div>
+  <div class="legend-item"><div class="legend-dot f"></div> Confirmed Faithful</div>
   <div class="legend-item"><span class="odds-badge" style="margin-right:0.4rem;">6/1</span> William Hill odds to win</div>
 </div>
 
@@ -759,7 +758,7 @@ const contestants = [
     name: "Amol Rajan",
     knownFor: "BBC journalist & presenter",
     bio: "Former BBC Media Editor and Today Programme presenter, Amol is one of the most recognisable faces in British broadcasting. Razor-sharp with words and an instinctive interrogator — he'll be reading his fellow players like headlines from day one.",
-    role: "traitor",
+    role: "faithful",
     verdict: "Born liar? No. But a journalist who can keep a straight face under pressure while quietly fishing for information is a dangerous Traitor. His credibility would disarm even the most suspicious Faithful.",
     chances: 4,
     odds: "20/1"
@@ -768,7 +767,7 @@ const contestants = [
     name: "Bella Ramsey",
     knownFor: "Actress — The Last of Us, Game of Thrones",
     bio: "Emmy-nominated star of HBO's The Last of Us and the formidable Lyanna Mormont in Game of Thrones. At 21, Bella is one of the most acclaimed young actors on the planet. Fierce, intense, and emotionally intelligent — exactly the type who thrives in high-stakes psychological games.",
-    role: "traitor",
+    role: "faithful",
     verdict: "An actor trained to inhabit characters and lie convincingly? Perfect Traitor material. Young enough that others may underestimate her, but absolutely sharp enough to exploit that.",
     chances: 5,
     odds: "7/1"
@@ -777,7 +776,7 @@ const contestants = [
     name: "James Acaster",
     knownFor: "Stand-up comedian",
     bio: "One of Britain's most critically acclaimed and brilliantly weird stand-up comedians. Known for his absurdist style, four back-to-back Netflix specials, and being the Taskmaster record holder. Unpredictable, highly intelligent, and strategically baffling.",
-    role: "either",
+    role: "traitor",
     verdict: "Acaster is a chaos agent. Too odd to read, too smart to dismiss. His unpredictability could be a Traitor's superpower — or it could see him banished early by a nervous Faithful majority.",
     chances: 3,
     odds: "9/1"
@@ -795,7 +794,7 @@ const contestants = [
     name: "Jerry Hall",
     knownFor: "Model & actress, ex-partner of Mick Jagger",
     bio: "Texas-born supermodel who defined the 1970s and 80s fashion era, long-term partner of Mick Jagger, and now a stage actress and cultural icon. At 69, she's seen everything. Glamorous, socially brilliant, and utterly unreadable when she wants to be.",
-    role: "either",
+    role: "faithful",
     verdict: "Decades of navigating the upper echelons of show business and society make Jerry a natural social operator. She could charm or deceive with equal ease. Wildcard of the series.",
     chances: 3,
     odds: "16/1"
@@ -804,7 +803,7 @@ const contestants = [
     name: "Joanne McNally",
     knownFor: "Irish comedian & podcaster",
     bio: "Irish stand-up comedian and co-host of the massively popular podcast My Therapist Ghosted Me with Vogue Williams. Brutally funny, completely unfiltered, and one of the sharpest observers of human behaviour in British-Irish comedy.",
-    role: "traitor",
+    role: "faithful",
     verdict: "McNally's whole brand is reading people and calling them out — which, flipped, makes her exceptional at playing others. She'd be a brilliant, entertaining Traitor who'd make great TV either way.",
     chances: 4,
     odds: "6/1 F"
@@ -840,7 +839,7 @@ const contestants = [
     name: "Leigh-Anne Pinnock",
     knownFor: "Singer — Little Mix",
     bio: "One-quarter of Little Mix, the most successful girl group in UK chart history. Since the group's hiatus, Leigh-Anne has launched a solo career and stepped into acting. Driven, competitive, and no stranger to managing complex group dynamics after years in one of pop's most scrutinised bands.",
-    role: "either",
+    role: "faithful",
     verdict: "Years in the hyper-competitive pop world gave Leigh-Anne thick skin and strategic thinking. She understands alliance dynamics instinctively. Could be devastating as either role.",
     chances: 4,
     odds: "14/1"
@@ -858,7 +857,7 @@ const contestants = [
     name: "Michael Sheen",
     knownFor: "Actor — The Queen, Frost/Nixon, Good Omens",
     bio: "One of Britain's most celebrated actors, renowned for his transformative portrayals of real people — Tony Blair, David Frost, Brian Clough. Stars as Aziraphale in Good Omens. A passionate activist and intellectual who gave up his Hollywood earnings to fund Welsh communities. Supremely articulate and emotionally perceptive.",
-    role: "either",
+    role: "faithful",
     verdict: "Sheen can embody any character convincingly — the ideal Traitor skill. But he's also genuinely moral and may find sustained deception psychologically uncomfortable. Will be one of the most compelling players regardless of role.",
     chances: 4,
     odds: "7/1"
@@ -876,7 +875,7 @@ const contestants = [
     name: "Myha'la",
     knownFor: "Actress — Industry, Knives Out: Glass Onion",
     bio: "American actress who broke through as the manipulative, ambitious Harper Stern in BBC/HBO's finance drama Industry, and appeared in Rian Johnson's Glass Onion. Playing morally complex, strategically brilliant characters is her stock-in-trade. The only non-British cast member.",
-    role: "traitor",
+    role: "faithful",
     verdict: "She plays scheming characters for a living and does it brilliantly. As a Traitor she'd be in her element — cool, controlled, and utterly convincing. One of the likeliest cast members to have been chosen as a Traitor by production.",
     chances: 5,
     odds: "16/1"
@@ -894,7 +893,7 @@ const contestants = [
     name: "Richard E. Grant",
     knownFor: "Actor — Withnail & I, Can You Ever Forgive Me?",
     bio: "Oscar-nominated British actor and national treasure, beloved for Withnail & I, Can You Ever Forgive Me?, and Loki. Known off-screen for exuberant social media presence and heartfelt openness about his personal life. Camp, theatrical, and utterly charming.",
-    role: "faithful",
+    role: "traitor",
     verdict: "Richard E. Grant is too gloriously, transparently himself to make a convincing long-term Traitor. He'll be fabulous, emotional, and probably terrible at detecting liars — but wonderful television throughout.",
     chances: 2,
     odds: "14/1"
@@ -903,7 +902,7 @@ const contestants = [
     name: "Rob Beckett",
     knownFor: "Stand-up comedian & TV presenter",
     bio: "South-east London comedian and Taskmaster veteran, co-host of the hugely popular Parenting Hell podcast with Josh Widdicombe. One of Britain's most likeable and hardworking comics, with an everyman quality that makes people instantly comfortable around him.",
-    role: "either",
+    role: "faithful",
     verdict: "Rob's warmth and likeability cut both ways. As a Faithful he's a trusted voice at the Round Table; as a Traitor, nobody would suspect the cheerful bloke from South London until it was far too late.",
     chances: 4,
     odds: "12/1"
@@ -912,7 +911,7 @@ const contestants = [
     name: "Romesh Ranganathan",
     knownFor: "Stand-up comedian & TV presenter",
     bio: "One of the UK's most prolific TV presences — The Ranganation, Rob & Romesh Vs, The Weakest Link reboot, and Taskmaster champion. Deadpan, intelligent, and strategically sharp. Despite presenting the rebooted Weakest Link (a show entirely about betrayal), he tends to project honesty.",
-    role: "either",
+    role: "faithful",
     verdict: "His deadpan delivery makes him very hard to read — which is exactly what a Traitor needs. Experienced enough in TV dynamics to play the long game. Dark horse of the series.",
     chances: 4,
     odds: "10/1"
@@ -921,7 +920,7 @@ const contestants = [
     name: "Ross Kemp",
     knownFor: "Actor & journalist — EastEnders, Ross Kemp on Gangs",
     bio: "Former EastEnders hard man (Grant Mitchell) turned BAFTA-winning documentary journalist, embedded with armed forces and gang members worldwide. Ross Kemp on Gangs is a television landmark. Physically formidable, emotionally intelligent, and genuinely experienced in high-stakes human situations.",
-    role: "traitor",
+    role: "faithful",
     verdict: "Real-world experience in conflict zones and with genuinely dangerous people gives Kemp an edge in psychological pressure. He's read people for his life before. As a Traitor he'd be ice-cold. Highly dangerous.",
     chances: 4,
     odds: "14/1"
@@ -930,7 +929,7 @@ const contestants = [
     name: "Sebastian Croft",
     knownFor: "Actor — Heartstopper, Downton Abbey",
     bio: "Young British actor known for playing Ben Hope in Netflix's Heartstopper — the controlling ex who hides his sexuality. Also appeared in Downton Abbey: A New Era. At 23, he's one of the youngest contestants, but his role in Heartstopper required him to perform sustained, convincing deception on screen.",
-    role: "traitor",
+    role: "faithful",
     verdict: "His Heartstopper character was literally a closeted liar. Croft knows how to perform concealment. Young enough to be underestimated; skilled enough to be dangerous. Could be a sleeper Traitor.",
     chances: 3,
     odds: "20/1"
@@ -961,7 +960,7 @@ function badgeClass(role) {
   return { traitor: 'verdict-traitor', faithful: 'verdict-faithful', either: 'verdict-either' }[role];
 }
 function badgeLabel(role) {
-  return { traitor: 'Born Traitor', faithful: 'Play Faithful', either: 'Could Go Either Way' }[role];
+  return { traitor: 'Confirmed Traitor', faithful: 'Confirmed Faithful', either: 'Could Go Either Way' }[role];
 }
 
 function buildCard(c, photoUrl) {
@@ -1284,6 +1283,25 @@ try {
     adminNextToLeaveBody.appendChild(row);
   });
 
+  // Keep the admin form in sync with whatever's already saved, so re-saving
+  // (e.g. to add a new episode's results) never wipes out earlier entries.
+  function populateAdminForm(results) {
+    document.querySelectorAll('#adminBody .game-row').forEach(row => {
+      const checkbox = row.querySelector('.admin-traitor');
+      const actual = results && results.actual && results.actual[row.dataset.name];
+      checkbox.checked = !!(actual && actual.traitor);
+    });
+    document.querySelectorAll('#adminNextToLeaveBody .game-row').forEach(row => {
+      const banSel = row.querySelector('.admin-banished');
+      const murSel = row.querySelector('.admin-murdered');
+      const actual = results && results.actualNextToLeave && results.actualNextToLeave[row.dataset.ep];
+      banSel.value = (actual && actual.banished) || '';
+      murSel.value = (actual && actual.murdered) || '';
+    });
+    const winnerSel = document.getElementById('adminWinner');
+    if (winnerSel) winnerSel.value = (results && results.actualWinner) || '';
+  }
+
   // ---------- Enforce max 4 Traitor picks ----------
   const MAX_TRAITORS = 4;
   const roleSelects = Array.from(document.querySelectorAll('#gameBody .predict-role'));
@@ -1538,6 +1556,7 @@ try {
     latestResults = doc.exists ? doc.data() : null;
     computeAndRenderLeaderboard(cachedPredictions);
     applyEliminationOverlays(latestResults);
+    populateAdminForm(latestResults);
   }, err => console.error('results listener error:', err));
 
   db.collection('predictions').onSnapshot(snap => {
