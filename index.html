@@ -1412,30 +1412,30 @@ try {
       }
       const data = doc.data();
 
-      // Restore starting role picks (skip any row already locked/disabled)
+      // Restore starting role picks (always show saved value; disabled attr already blocks edits)
       document.querySelectorAll('#gameBody .game-row').forEach(row => {
         const sel = row.querySelector('.predict-role');
         const saved = data.picks && data.picks[row.dataset.name];
-        if (saved && saved.role && !sel.disabled) {
+        if (saved && saved.role) {
           sel.value = saved.role;
           sel.dataset.prevValue = saved.role;
         }
       });
       if (typeof updateTraitorCount === 'function') updateTraitorCount();
 
-      // Restore Banished/Murdered picks (skip locked rounds)
+      // Restore Banished/Murdered picks (always show saved value; disabled attr already blocks edits)
       document.querySelectorAll('#nextToLeaveBody .game-row').forEach(row => {
         const saved = data.nextToLeave && data.nextToLeave[row.dataset.ep];
         if (!saved) return;
         const banSel = row.querySelector('.predict-banished');
         const murSel = row.querySelector('.predict-murdered');
-        if (saved.banished && banSel && !banSel.disabled) banSel.value = saved.banished;
-        if (saved.murdered && murSel && !murSel.disabled) murSel.value = saved.murdered;
+        if (saved.banished && banSel) banSel.value = saved.banished;
+        if (saved.murdered && murSel) murSel.value = saved.murdered;
       });
 
-      // Restore winner pick (skip if locked)
+      // Restore winner pick (always show saved value; disabled attr already blocks edits)
       const winnerSel = document.getElementById('winnerPick');
-      if (data.winnerPick && !winnerSel.disabled) winnerSel.value = data.winnerPick;
+      if (data.winnerPick) winnerSel.value = data.winnerPick;
 
       status.textContent = "✓ Loaded your picks from \"" + data.name + "\" — make any changes, then hit Submit to update.";
     } catch (e) {
