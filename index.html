@@ -445,6 +445,46 @@
     .show-info { grid-template-columns: 1fr; }
     .card-header { flex-wrap: wrap; }
   }
+.wins-breakdown {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--mid, #6b6b6b);
+  margin-top: 0.15rem;
+  line-height: 1.4;
+}
+.wins-breakdown.wins-none {
+  font-style: italic;
+  opacity: 0.7;
+}
+.elimination-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: rgba(10,6,4,0.35);
+  z-index: 2;
+}
+.elimination-overlay.show { display: flex; }
+.elimination-overlay svg {
+  width: 72%;
+  height: 72%;
+  filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));
+}
+.elimination-label {
+  margin-top: -0.4rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #c0152b;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
 .game-intro {
   max-width: 900px;
   margin: 0 auto 1.5rem;
@@ -927,6 +967,7 @@ function badgeLabel(role) {
 function buildCard(c, photoUrl) {
   const card = document.createElement('div');
   card.className = `card ${roleClass(c.role)}`;
+  card.dataset.name = c.name;
   const initials = c.name.replace("'","").split(' ').map(w => w[0]).filter(Boolean).join('').slice(0,2).toUpperCase();
 
   card.innerHTML = `
@@ -936,6 +977,13 @@ function buildCard(c, photoUrl) {
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
         : ''}
       <div class="card-photo-placeholder" style="${photoUrl ? 'display:none' : ''}">${initials}</div>
+      <div class="elimination-overlay">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="12" x2="88" y2="88" stroke="#c0152b" stroke-width="13" stroke-linecap="round"/>
+          <line x1="88" y1="12" x2="12" y2="88" stroke="#c0152b" stroke-width="13" stroke-linecap="round"/>
+        </svg>
+        <div class="elimination-label"></div>
+      </div>
     </div>
     <div class="card-body">
       <div class="card-header">
@@ -983,6 +1031,29 @@ contestants.forEach(c => {
     }
   }
 });
+
+function applyEliminationOverlays(results) {
+  const eliminated = {}; // name -> 'Banished' | 'Murdered'
+  if (results && results.actualNextToLeave) {
+    Object.values(results.actualNextToLeave).forEach(ep => {
+      if (ep.banished) eliminated[ep.banished] = 'Banished';
+      if (ep.murdered) eliminated[ep.murdered] = 'Murdered';
+    });
+  }
+  document.querySelectorAll('#contestants .card').forEach(card => {
+    const name = card.dataset.name;
+    const overlay = card.querySelector('.elimination-overlay');
+    const label = card.querySelector('.elimination-label');
+    if (!overlay) return;
+    if (eliminated[name]) {
+      overlay.classList.add('show');
+      if (label) label.textContent = eliminated[name];
+    } else {
+      overlay.classList.remove('show');
+      if (label) label.textContent = '';
+    }
+  });
+}
 
 // ---- Firebase (shared leaderboard) ----
 // 1. Go to https://console.firebase.google.com → Create a project (free)
@@ -1407,13 +1478,17 @@ try {
     const rows = predictionDocs.map(doc => {
       const data = doc.data();
       let rolePts = 0, exitPts = 0, bonusPts = 0;
+      const wins = [];
 
       if (latestResults && latestResults.actual) {
         Object.keys(data.picks || {}).forEach(name => {
           const pick = data.picks[name];
           const actual = latestResults.actual[name];
           if (!actual || !pick) return;
-          if (pick.role && ((pick.role === 'traitor') === !!actual.traitor)) rolePts += 3;
+          if (pick.role && ((pick.role === 'traitor') === !!actual.traitor)) {
+            rolePts += 3;
+            wins.push(`${name} (${pick.role === 'traitor' ? 'Traitor' : 'Faithful'})`);
+          }
         });
       }
 
@@ -1422,16 +1497,23 @@ try {
           const pick = data.nextToLeave[ep];
           const actual = latestResults.actualNextToLeave[ep];
           if (!pick || !actual) return;
-          if (pick.banished && actual.banished && pick.banished === actual.banished) exitPts += 4;
-          if (pick.murdered && actual.murdered && pick.murdered === actual.murdered) exitPts += 4;
+          if (pick.banished && actual.banished && pick.banished === actual.banished) {
+            exitPts += 4;
+            wins.push(`Ep${ep} Banished: ${pick.banished}`);
+          }
+          if (pick.murdered && actual.murdered && pick.murdered === actual.murdered) {
+            exitPts += 4;
+            wins.push(`Ep${ep} Murdered: ${pick.murdered}`);
+          }
         });
       }
 
       if (latestResults && latestResults.actualWinner && data.winnerPick && data.winnerPick === latestResults.actualWinner) {
         bonusPts += 10;
+        wins.push(`Winner: ${data.winnerPick}`);
       }
 
-      return { name: data.name, rolePts, exitPts, bonusPts, total: rolePts + exitPts + bonusPts };
+      return { name: data.name, rolePts, exitPts, bonusPts, total: rolePts + exitPts + bonusPts, wins };
     });
 
     rows.sort((a, b) => b.total - a.total);
@@ -1439,7 +1521,10 @@ try {
     body.innerHTML = rows.map((r, i) => `
       <tr>
         <td>${i + 1}</td>
-        <td class="name-cell">${r.name}</td>
+        <td class="name-cell">
+          ${r.name}
+          ${r.wins.length ? `<div class="wins-breakdown">${r.wins.join(' · ')}</div>` : '<div class="wins-breakdown wins-none">No points yet</div>'}
+        </td>
         <td>${r.rolePts}</td>
         <td>${r.exitPts}</td>
         <td>${r.bonusPts}</td>
@@ -1452,6 +1537,7 @@ try {
   db.collection('meta').doc('results').onSnapshot(doc => {
     latestResults = doc.exists ? doc.data() : null;
     computeAndRenderLeaderboard(cachedPredictions);
+    applyEliminationOverlays(latestResults);
   }, err => console.error('results listener error:', err));
 
   db.collection('predictions').onSnapshot(snap => {
